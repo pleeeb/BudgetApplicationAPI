@@ -1,6 +1,5 @@
 using BudgetApplicationAPI.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using System.Runtime.CompilerServices;
 

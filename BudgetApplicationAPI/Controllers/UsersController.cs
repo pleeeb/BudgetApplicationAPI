@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BudgetApplicationAPI.Models;
 
@@ -13,9 +8,9 @@ namespace BudgetApplicationAPI.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly BudgetContext _context;
+        private readonly IBudgetContext _context;
 
-        public UsersController(BudgetContext context)
+        public UsersController(IBudgetContext context)
         {
             _context = context;
         }
@@ -24,12 +19,8 @@ namespace BudgetApplicationAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
-            var user = await _context.Users.ToListAsync();
-            if (user == null || user.Count == 0)
-            {
-                return NotFound();
-            }
-            return await _context.Users.ToListAsync();
+            var users = await _context.Users.ToListAsync().ConfigureAwait(false);
+            return users ?? Enumerable.Empty<User>().ToList();
         }
 
         // GET: api/Users/5
@@ -60,7 +51,14 @@ namespace BudgetApplicationAPI.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(user).State = EntityState.Modified;
+            var existingUser = await _context.Users.FindAsync(id);
+
+            if (existingUser == null)
+            {
+                return NotFound();
+            }
+
+            _context.Entry(existingUser).CurrentValues.SetValues(user);
 
             try
             {
@@ -68,7 +66,7 @@ namespace BudgetApplicationAPI.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!UserExists(id))
+                if (!(await UserExists(id)))
                 {
                     return NotFound();
                 }
@@ -116,9 +114,9 @@ namespace BudgetApplicationAPI.Controllers
             return NoContent();
         }
 
-        private bool UserExists(int id)
+        private async Task<bool> UserExists(int id)
         {
-            return (_context.Users?.Any(e => e.UserId == id)).GetValueOrDefault();
+            return (await _context.Users.FindAsync(id)) != null;
         }
     }
 }

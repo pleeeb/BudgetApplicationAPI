@@ -98,7 +98,7 @@ namespace BudgetApplicationAPI.Controllers
             }
             catch (DbUpdateException)
             {
-                if (AuthenticationExists(authentication.AuthToken))
+                if (authentication.AuthToken != null && AuthenticationExists(authentication.AuthToken))
                 {
                     return Conflict();
                 }
