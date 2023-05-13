@@ -31,7 +31,7 @@ namespace BudgetApplicationAPI.Controllers
             {
                 return NotFound();
             }
-            var user = await _context.Users.FindAsync(id);
+            var user = await _context.Users.FindAsync(id).ConfigureAwait(false);
 
             if (user == null)
             {
@@ -51,7 +51,7 @@ namespace BudgetApplicationAPI.Controllers
                 return BadRequest();
             }
 
-            var existingUser = await _context.Users.FindAsync(id);
+            var existingUser = await _context.Users.FindAsync(id).ConfigureAwait(false);
 
             if (existingUser == null)
             {
@@ -89,7 +89,7 @@ namespace BudgetApplicationAPI.Controllers
                 return Problem("Entity set 'UserContext.Users'  is null.");
             }
             _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
 
             return CreatedAtAction("GetUser", new { id = user.UserId }, user);
         }
@@ -102,21 +102,21 @@ namespace BudgetApplicationAPI.Controllers
             {
                 return NotFound();
             }
-            var user = await _context.Users.FindAsync(id);
+            var user = await _context.Users.FindAsync(id).ConfigureAwait(false);
             if (user == null)
             {
                 return NotFound();
             }
 
             _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
 
             return NoContent();
         }
 
         private async Task<bool> UserExists(int id)
         {
-            return (await _context.Users.FindAsync(id)) != null;
+            return (await _context.Users.FindAsync(id).ConfigureAwait(false)) != null;
         }
     }
 }

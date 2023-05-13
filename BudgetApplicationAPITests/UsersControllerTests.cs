@@ -1,6 +1,8 @@
 using BudgetApplicationAPI.Controllers;
 using BudgetApplicationAPI.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Moq;
 using System.Net.Sockets;
 
@@ -43,6 +45,145 @@ namespace BudgetApplicationAPITests
             Assert.NotNull(users.Value);
             Assert.That(users.Value.Count(), Is.EqualTo(3));
         }
+
+        [Test]
+        public async Task GetUser_ReturnsNotFound_WhenUserDoesNotExist()
+        {
+            // Arrange
+            var userId = 4;
+            var service = new UsersController(_mockBudgetContext.Object);
+
+            // Act
+            var result = await service.GetUser(userId);
+
+            // Assert
+            Assert.IsInstanceOf<NotFoundResult>(result.Result);
+        }
+
+        [Test]
+        public async Task PutUser_ReturnsBadRequest_WhenIdsDoNotMatch()
+        {
+            // Arrange
+            var userId = 1;
+            var updatedUser = new User
+            {
+                UserId = 2,
+                Username = "UpdatedTest",
+                Email = "updatedemail@hotmail.com",
+                PasswordHash = "updatedhash",
+                FirstName = "Updated",
+                LastName = "UpdatedLast",
+                CreatedOn = DateTime.Now,
+                LastLoginOn = DateTime.Now,
+                IsActive = true,
+            };
+            var service = new UsersController(_mockBudgetContext.Object);
+
+            // Act
+            var result = await service.PutUser(userId, updatedUser);
+
+            // Assert
+            Assert.IsInstanceOf<BadRequestResult>(result);
+        }
+
+        [Test]
+        public async Task PutUser_ReturnsNotFound_WhenUserDoesNotExist()
+        {
+            // Arrange
+            var userId = 4;
+            var updatedUser = new User
+            {
+                UserId = userId,
+                Username = "UpdatedTest",
+                Email = "updatedemail@hotmail.com",
+                PasswordHash = "updatedhash",
+                FirstName = "Updated",
+                LastName = "UpdatedLast",
+                CreatedOn = DateTime.Now,
+                LastLoginOn = DateTime.Now,
+                IsActive = true,
+            };
+            var service = new UsersController(_mockBudgetContext.Object);
+
+            // Act
+            var result = await service.PutUser(userId, updatedUser);
+
+            // Assert
+            Assert.IsInstanceOf<NotFoundResult>(result);
+        }
+
+        [Test]
+        public async Task PostUser_ReturnsUser_WhenUserIsValid()
+        {
+            // Arrange
+            var newUser = new User
+            {
+                Username = "NewTest",
+                Email = "newtest@hotmail.com",
+                PasswordHash = "newhash",
+                FirstName = "New",
+                LastName = "NewLast",
+                CreatedOn = DateTime.Now,
+                LastLoginOn = DateTime.Now,
+                IsActive = true,
+            };
+
+            _mockBudgetContext.Setup(x => x.Users.Add(newUser));
+            _mockBudgetContext.Setup(x => x.SaveChangesAsync(CancellationToken.None)).Returns(Task.FromResult(0));
+
+            var service = new UsersController(_mockBudgetContext.Object);
+
+            // Act
+            var result = await service.PostUser(newUser);
+
+            // Assert
+            Assert.IsNotNull(result);
+            var createdAtActionResult = result.Result as CreatedAtActionResult;
+            Assert.IsNotNull(createdAtActionResult);
+            var returnValue = createdAtActionResult.Value as User;
+            Assert.IsNotNull(returnValue);
+        }
+
+        [Test]
+        public async Task DeleteUser_ReturnsNoContent_WhenUserExists()
+        {
+            // Arrange
+            var userId = 1;
+            var existingUser = new User
+            {
+                UserId = userId,
+                // other properties...
+            };
+
+            _mockSet.Setup(m => m.FindAsync(It.IsAny<object[]>()))
+                .Returns(new ValueTask<User>(existingUser));
+
+            _mockBudgetContext.Setup(x => x.Users).Returns(_mockSet.Object);
+
+            var service = new UsersController(_mockBudgetContext.Object);
+
+            // Act
+            var result = await service.DeleteUser(userId);
+
+            // Assert
+            Assert.IsInstanceOf<NoContentResult>(result);
+        }
+
+        [Test]
+        public async Task DeleteUser_ReturnsNotFound_WhenUserDoesNotExist()
+        {
+            // Arrange
+            var userId = 4;
+            var service = new UsersController(_mockBudgetContext.Object);
+
+            // Act
+            var result = await service.DeleteUser(userId);
+
+            // Assert
+            Assert.IsInstanceOf<NotFoundResult>(result);
+        }
+
+
 
         private static List<User> GetFakeUserList()
         {
