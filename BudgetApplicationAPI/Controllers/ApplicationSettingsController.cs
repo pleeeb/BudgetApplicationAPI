@@ -13,9 +13,9 @@ namespace BudgetApplicationAPI.Controllers
     [ApiController]
     public class ApplicationSettingsController : ControllerBase
     {
-        private readonly BudgetContext _context;
+        private readonly IBudgetContext _context;
 
-        public ApplicationSettingsController(BudgetContext context)
+        public ApplicationSettingsController(IBudgetContext context)
         {
             _context = context;
         }
@@ -24,24 +24,24 @@ namespace BudgetApplicationAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ApplicationSetting>>> GetApplicationSetting()
         {
-            var appSettings = await _context.ApplicationSetting.ToListAsync();
+            var appSettings = await _context.ApplicationSetting.ToListAsync().ConfigureAwait(false);
             if (appSettings == null || appSettings.Count == 0)
             {
                 return NotFound();
             }
-            return await _context.ApplicationSetting.ToListAsync();
+            return appSettings;
         }
 
         // GET: api/ApplicationSettings/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ApplicationSetting>> GetApplicationSetting(int id)
         {
-            var appSettings = await _context.ApplicationSetting.ToListAsync();
+            var appSettings = await _context.ApplicationSetting.ToListAsync().ConfigureAwait(false);
             if (appSettings == null || appSettings.Count == 0)
             {
                 return NotFound();
             }
-            var applicationSetting = await _context.ApplicationSetting.FindAsync(id);
+            var applicationSetting = await _context.ApplicationSetting.FindAsync(id).ConfigureAwait(false);
 
             if (applicationSetting == null)
             {
@@ -65,7 +65,7 @@ namespace BudgetApplicationAPI.Controllers
 
             try
             {
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync().ConfigureAwait(false);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -92,7 +92,7 @@ namespace BudgetApplicationAPI.Controllers
                 return Problem("Entity set 'BudgetContext.ApplicationSetting'  is null.");
             }
             _context.ApplicationSetting.Add(applicationSetting);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
 
             return CreatedAtAction("GetApplicationSetting", new { id = applicationSetting.SettingId }, applicationSetting);
         }
@@ -105,14 +105,14 @@ namespace BudgetApplicationAPI.Controllers
             {
                 return NotFound();
             }
-            var applicationSetting = await _context.ApplicationSetting.FindAsync(id);
+            var applicationSetting = await _context.ApplicationSetting.FindAsync(id).ConfigureAwait(false);
             if (applicationSetting == null)
             {
                 return NotFound();
             }
 
             _context.ApplicationSetting.Remove(applicationSetting);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
 
             return NoContent();
         }

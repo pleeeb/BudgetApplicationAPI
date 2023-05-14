@@ -13,9 +13,9 @@ namespace BudgetApplicationAPI.Controllers
     [ApiController]
     public class LinkedBudgetsController : ControllerBase
     {
-        private readonly BudgetContext _context;
+        private readonly IBudgetContext _context;
 
-        public LinkedBudgetsController(BudgetContext context)
+        public LinkedBudgetsController(IBudgetContext context)
         {
             _context = context;
         }
@@ -24,12 +24,12 @@ namespace BudgetApplicationAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<LinkedBudget>>> GetLinkedBudget()
         {
-            var linkedBudget = await _context.LinkedBudget.ToListAsync();
+            var linkedBudget = await _context.LinkedBudget.ToListAsync().ConfigureAwait(false);
             if (linkedBudget == null || linkedBudget.Count == 0)
             {
                 return NotFound();
             }
-            return await _context.LinkedBudget.ToListAsync();
+            return linkedBudget;
         }
 
         // GET: api/LinkedBudgets/5
@@ -40,7 +40,7 @@ namespace BudgetApplicationAPI.Controllers
             {
                 return NotFound();
             }
-            var linkedBudget = await _context.LinkedBudget.FindAsync(id);
+            var linkedBudget = await _context.LinkedBudget.FindAsync(id).ConfigureAwait(false);
 
             if (linkedBudget == null)
             {
@@ -64,7 +64,7 @@ namespace BudgetApplicationAPI.Controllers
 
             try
             {
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync().ConfigureAwait(false);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -91,7 +91,7 @@ namespace BudgetApplicationAPI.Controllers
                 return Problem("Entity set 'BudgetContext.LinkedBudget'  is null.");
             }
             _context.LinkedBudget.Add(linkedBudget);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
 
             return CreatedAtAction("GetLinkedBudget", new { id = linkedBudget.LinkId }, linkedBudget);
         }
@@ -104,14 +104,14 @@ namespace BudgetApplicationAPI.Controllers
             {
                 return NotFound();
             }
-            var linkedBudget = await _context.LinkedBudget.FindAsync(id);
+            var linkedBudget = await _context.LinkedBudget.FindAsync(id).ConfigureAwait(false);
             if (linkedBudget == null)
             {
                 return NotFound();
             }
 
             _context.LinkedBudget.Remove(linkedBudget);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
 
             return NoContent();
         }

@@ -11,7 +11,19 @@ namespace BudgetApplicationAPI.Models
     public interface IBudgetContext
     {
         DbSet<User> Users { get; set; }
+
+        DbSet<Budget> Budget { get; set; }
+
+        DbSet<LinkedBudget> LinkedBudget { get; set; }
+
+        DbSet<Transaction> Transaction { get; set; }
+
+        DbSet<Authentication> Authentication { get; set; }
+
+        DbSet<ApplicationSetting> ApplicationSetting { get; set; }
+
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+
         EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;
     }
 

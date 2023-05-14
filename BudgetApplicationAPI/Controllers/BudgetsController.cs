@@ -13,9 +13,9 @@ namespace BudgetApplicationAPI.Controllers
     [ApiController]
     public class BudgetsController : ControllerBase
     {
-        private readonly BudgetContext _context;
+        private readonly IBudgetContext _context;
 
-        public BudgetsController(BudgetContext context)
+        public BudgetsController(IBudgetContext context)
         {
             _context = context;
         }
@@ -24,12 +24,12 @@ namespace BudgetApplicationAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Budget>>> GetBudget()
         {
-            var budget = await _context.Budget.ToListAsync();
+            var budget = await _context.Budget.ToListAsync().ConfigureAwait(false);
             if (budget == null || budget.Count == 0) 
             {
                 return NotFound();
             }
-            return await _context.Budget.ToListAsync();
+            return budget;
         }
 
         // GET: api/Budgets/5
@@ -40,7 +40,7 @@ namespace BudgetApplicationAPI.Controllers
           {
               return NotFound();
           }
-            var budget = await _context.Budget.FindAsync(id);
+            var budget = await _context.Budget.FindAsync(id).ConfigureAwait(false);
 
             if (budget == null)
             {
@@ -64,7 +64,7 @@ namespace BudgetApplicationAPI.Controllers
 
             try
             {
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync().ConfigureAwait(false);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -91,7 +91,7 @@ namespace BudgetApplicationAPI.Controllers
               return Problem("Entity set 'BudgetContext.Budget'  is null.");
           }
             _context.Budget.Add(budget);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
 
             return CreatedAtAction("GetBudget", new { id = budget.BudgetId }, budget);
         }
@@ -104,14 +104,14 @@ namespace BudgetApplicationAPI.Controllers
             {
                 return NotFound();
             }
-            var budget = await _context.Budget.FindAsync(id);
+            var budget = await _context.Budget.FindAsync(id).ConfigureAwait(false);
             if (budget == null)
             {
                 return NotFound();
             }
 
             _context.Budget.Remove(budget);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
 
             return NoContent();
         }

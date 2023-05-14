@@ -13,9 +13,9 @@ namespace BudgetApplicationAPI.Controllers
     [ApiController]
     public class AuthenticationsController : ControllerBase
     {
-        private readonly BudgetContext _context;
+        private readonly IBudgetContext _context;
 
-        public AuthenticationsController(BudgetContext context)
+        public AuthenticationsController(IBudgetContext context)
         {
             _context = context;
         }
@@ -24,24 +24,24 @@ namespace BudgetApplicationAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Authentication>>> GetAuthentication()
         {
-            var authentications = await _context.Authentication.ToListAsync();
+            var authentications = await _context.Authentication.ToListAsync().ConfigureAwait(false);
             if (authentications == null || authentications.Count == 0)
             {
                 return NotFound();
             }
-            return await _context.Authentication.ToListAsync();
+            return authentications;
         }
 
         // GET: api/Authentications/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Authentication>> GetAuthentication(string id)
         {
-            var authentications = await _context.Authentication.ToListAsync();
+            var authentications = await _context.Authentication.ToListAsync().ConfigureAwait(false);
             if (authentications == null || authentications.Count == 0)
             {
                 return NotFound();
             }
-            var authentication = await _context.Authentication.FindAsync(id);
+            var authentication = await _context.Authentication.FindAsync(id).ConfigureAwait(false);
 
             if (authentication == null)
             {
@@ -65,7 +65,7 @@ namespace BudgetApplicationAPI.Controllers
 
             try
             {
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync().ConfigureAwait(false);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -94,7 +94,7 @@ namespace BudgetApplicationAPI.Controllers
             _context.Authentication.Add(authentication);
             try
             {
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync().ConfigureAwait(false);
             }
             catch (DbUpdateException)
             {
@@ -119,14 +119,14 @@ namespace BudgetApplicationAPI.Controllers
             {
                 return NotFound();
             }
-            var authentication = await _context.Authentication.FindAsync(id);
+            var authentication = await _context.Authentication.FindAsync(id).ConfigureAwait(false);
             if (authentication == null)
             {
                 return NotFound();
             }
 
             _context.Authentication.Remove(authentication);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
 
             return NoContent();
         }

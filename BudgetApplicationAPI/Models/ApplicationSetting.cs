@@ -11,10 +11,10 @@ namespace BudgetApplicationAPI.Models
 
         [Required]
         [Column(TypeName = "varchar(250)")]
-        public int? Name { get; set; }
+        public string? Name { get; set; }
 
         [Required]
         [Column(TypeName = "varchar(250)")]
-        public int? Value { get; set; }
+        public string? Value { get; set; }
     }
 }

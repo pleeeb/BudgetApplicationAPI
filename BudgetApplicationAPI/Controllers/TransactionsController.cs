@@ -13,9 +13,9 @@ namespace BudgetApplicationAPI.Controllers
     [ApiController]
     public class TransactionsController : ControllerBase
     {
-        private readonly BudgetContext _context;
+        private readonly IBudgetContext _context;
 
-        public TransactionsController(BudgetContext context)
+        public TransactionsController(IBudgetContext context)
         {
             _context = context;
         }
@@ -24,12 +24,12 @@ namespace BudgetApplicationAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Transaction>>> GetTransaction()
         {
-            var transaction = await _context.Transaction.ToListAsync();
+            var transaction = await _context.Transaction.ToListAsync().ConfigureAwait(false);
             if (transaction == null || transaction.Count == 0)
             {
                 return NotFound();
             }
-            return await _context.Transaction.ToListAsync();
+            return transaction;
         }
 
         // GET: api/Transactions/5
@@ -40,7 +40,7 @@ namespace BudgetApplicationAPI.Controllers
             {
                 return NotFound();
             }
-            var transaction = await _context.Transaction.FindAsync(id);
+            var transaction = await _context.Transaction.FindAsync(id).ConfigureAwait(false);
 
             if (transaction == null)
             {
@@ -64,7 +64,7 @@ namespace BudgetApplicationAPI.Controllers
 
             try
             {
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync().ConfigureAwait(false);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -91,7 +91,7 @@ namespace BudgetApplicationAPI.Controllers
                 return Problem("Entity set 'BudgetContext.Transaction'  is null.");
             }
             _context.Transaction.Add(transaction);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
 
             return CreatedAtAction("GetTransaction", new { id = transaction.TransactionId }, transaction);
         }
@@ -104,14 +104,14 @@ namespace BudgetApplicationAPI.Controllers
             {
                 return NotFound();
             }
-            var transaction = await _context.Transaction.FindAsync(id);
+            var transaction = await _context.Transaction.FindAsync(id).ConfigureAwait(false);
             if (transaction == null)
             {
                 return NotFound();
             }
 
             _context.Transaction.Remove(transaction);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
 
             return NoContent();
         }
